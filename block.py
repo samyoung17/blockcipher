@@ -47,7 +47,7 @@ def bruteForce(keyLength, cipher):
 			try:
 				k = bin(i).lstrip('0b').zfill(l)
 				plainText = decrypt(cipher, k)
-				sys.stdout.write('\r' + plainText)
+				sys.stdout.write('\r' + plainText.replace('\n','').replace('\r',''))
 				sys.stdout.flush()
 				if matches(plainText):
 					break
