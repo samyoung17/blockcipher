@@ -41,26 +41,33 @@ def matches(text):
 	return False
 
 def bruteForce(keyLength, cipher):
-	for i in range(1, 2**keyLength):
-		try:
-			k = bin(i).lstrip('0b').zfill(keyLength)
-			plainText = decrypt(cipher, k)
-			sys.stdout.write('\r' + plainText)
-			sys.stdout.flush()
-			if matches(plainText):
-				break
-		except UnicodeDecodeError:
-			continue
+	plainText = ''
+	for l in range(1, keyLength):
+		for i in range(1, 2**l):
+			try:
+				k = bin(i).lstrip('0b').zfill(l)
+				plainText = decrypt(cipher, k)
+				sys.stdout.write('\r' + plainText)
+				sys.stdout.flush()
+				if matches(plainText):
+					break
+			except UnicodeDecodeError:
+				continue
+		if matches(plainText):
+					break
 
-def testBruteForce():
-	l = 22
-	key = bin(2**l - 132).lstrip('0b')
-	cipher = encrypt('the cat in the hat generated a massive pink cat ring', key)
-	print('Starting brute force attack...')
+def main():
+	print('***** Brute force attack analysis tool *****')
+	plainText = input('Enter text to encrypt: ')
+	key = input('Enter binary encryption key: ')
+	cipher = encrypt(plainText, key)
+	input('Press enter to commence attack...')
+	print('***** Starting brute force attack *****')
 	start = time.time()
-	bruteForce(l, cipher)
+	bruteForce(200, cipher)
 	end = time.time()
-	print('\nDecrypted in ' + str(end - start) + 's')
+	print('\n***** Brute force attack successful *****')
+	print('Decrypted in ' + str(end - start) + 's')
 
 if __name__ == '__main__':
-	testBruteForce()
+	main()
