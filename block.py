@@ -1,14 +1,13 @@
 import sys
 import time
-
-WORDS = ['the ', ' of ', ' and ', ' to ', ' in ', ' for ', ' is ', ' on ', ' that ', ' by ', ' this ', ' with ', ' you ', ' it ', ' not ', ' or ', ' be ', ' are ', ' from ', ' at ', ' as ', ' your ', ' all ', ' have ', ' new ', ' more ', ' an ', ' was ', ' we ', ' will ', ' home', ' can ', ' us ', ' about ', ' if ', ' page ', ' my ', ' has ', ' search ', ' free ', ' but ', ' our ', ' one ', ' other ', ' do ', ' no ', ' information ', ' time ', ' they ', ' site ', ' he ', ' up ', ' may ', ' what ', ' which ', ' their ', ' news ', ' out ', ' use ', ' any ', ' there ', ' see ', ' only ', ' so ', ' his ', ' when ', ' contact ', ' here ', ' business ', ' who ', ' web ', ' also ', ' now ', ' help ', ' get ', ' pm ', ' view ', ' online ', ' first ', ' am ', ' been ', ' would ', ' how ', ' were ', ' me ', ' services ', ' some ', ' these ', ' click ', ' its ', ' like ', ' service ', ' than ', ' find ']
+import string
 
 def toBin(s):
 	return bin(int.from_bytes(s.encode('ascii'),'big')).lstrip('0b')
 
 def toString(b):
 	n = int(b,2)
-	return n.to_bytes((n.bit_length() + 7) // 8, 'big').decode('ascii')
+	return n.to_bytes((n.bit_length() + 7) // 8, 'big').decode('ascii', 'replace')
 
 def repeatBinary(b, l):
 	div = l // len(b)
@@ -34,11 +33,20 @@ def testDeciphering():
 	decipher = decrypt(cipher, key)
 	print(decipher)
 
+def isPrinatble(c):
+	return c in string.printable and c not in '\t\n\r\x0b\x0c'
+
+def isText(c):
+	return c in string.ascii_lowercase or c == ' '
+
 def matches(text):
-	for word in WORDS:
-		if text.find(word) >= 0:
-			return True
-	return False
+	return all(list(map(isText,text)))
+
+def printText(text):
+	printableText = ''.join(list(filter(isPrinatble,text)))
+	whiteSpace = (len(text) - len(printableText)) * ' '
+	sys.stdout.write('\r' + printableText + whiteSpace)
+	sys.stdout.flush()
 
 def bruteForce(keyLength, cipher):
 	plainText = ''
@@ -47,11 +55,13 @@ def bruteForce(keyLength, cipher):
 			try:
 				k = bin(i).lstrip('0b').zfill(l)
 				plainText = decrypt(cipher, k)
-				sys.stdout.write('\r' + plainText.replace('\n','').replace('\r',''))
-				sys.stdout.flush()
+				if i % 1000 == 0:
+					printText(plainText)
 				if matches(plainText):
+					printText(plainText)
 					break
 			except UnicodeDecodeError:
+				sys.stdout.write('\r' + 'afds')
 				continue
 		if matches(plainText):
 					break
@@ -60,7 +70,12 @@ def main():
 	print('***** Brute force attack analysis tool *****')
 	plainText = input('Enter text to encrypt: ')
 	key = input('Enter binary encryption key: ')
+	print('Encrypting secret message...')
+	time.sleep(1)
+	print('***** Begin secret message *****')
 	cipher = encrypt(plainText, key)
+	print(cipher)
+	print('***** End secret message *****')
 	input('Press enter to commence attack...')
 	print('***** Starting brute force attack *****')
 	start = time.time()
